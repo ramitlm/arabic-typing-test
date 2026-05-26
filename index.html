@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار سرعة الكتابة</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    padding:8px;
+    background:#0b202b;
+    font-family:Tahoma,Arial,sans-serif;
+    color:white;
+}
+.container{
+    max-width:1250px;
+    margin:auto;
+    background:#061720;
+    border:1px solid #ffb86b;
+    border-radius:18px;
+    padding:10px;
+}
+h1{
+    text-align:center;
+    color:#ffcc77;
+    margin:2px 0 8px;
+    font-size:21px;
+}
+.top-control{
+    background:#031016;
+    border-radius:16px;
+    padding:8px;
+    margin-bottom:8px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+}
+button,.type-btn{
+    border:none;
+    border-radius:16px;
+    padding:6px 11px;
+    font-weight:bold;
+    cursor:pointer;
+    background:#ff944d;
+    color:#102027;
+    font-size:13px;
+}
+button:hover,.type-btn:hover{background:#ffb071}
+.control-item{
+    background:#07212e;
+    color:#ffdd99;
+    padding:5px 9px;
+    border-radius:16px;
+    font-size:13px;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+input,select{
+    border:none;
+    border-radius:10px;
+    padding:4px;
+    font-weight:bold;
+    font-size:12px;
+}
+.ref-box{
+    background:#031016;
+    border-right:6px solid #ff944d;
+    border-radius:16px;
+    padding:8px;
+}
+.top-row{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:6px;
+    margin:5px 0;
+}
+.type-btn{
+    background:#174451;
+    color:white;
+    border:1px solid #ffaa66;
+}
+.type-btn.active{
+    background:#ff7733;
+    color:#081216;
+}
+.ref-text{
+    background:#08212c;
+    color:#fff4d6;
+    padding:10px;
+    border-radius:14px;
+    font-size:15px;
+    line-height:1.65;
+    height:210px;
+    overflow-y:auto;
+    white-space:normal;
+    word-break:normal;
+    font-family:Tahoma,Arial,sans-serif;
+}
+.correct-char{
+    background:#2ecc71;
+    color:#061612;
+    border-radius:3px;
+    padding:0 1px;
+}
+.wrong-char{
+    background:#e74c3c;
+    color:white;
+    border-radius:3px;
+    padding:0 1px;
+}
+.current-char{
+    background:#ffcc66;
+    color:#111;
+    border-radius:3px;
+    padding:0 2px;
+}
+textarea{
+    width:100%;
+    height:165px;
+    resize:none;
+    margin-top:8px;
+    border:none;
+    outline:none;
+    border-radius:17px;
+    padding:13px;
+    font-size:22px;
+    line-height:1.7;
+    background:#fff7e8;
+    color:#1f2a36;
+    font-weight:bold;
+    font-family:"Courier New",monospace;
+}
+textarea:disabled{background:#cfcfcf}
+.info-panel{
+    background:#041a24;
+    border-radius:17px;
+    padding:8px;
+    margin-top:8px;
+}
+.stats{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:7px;
+}
+.stat{
+    background:#010f17;
+    color:#ffcc77;
+    padding:7px 12px;
+    border-radius:17px;
+    font-weight:bold;
+    font-size:13px;
+}
+.timer{
+    text-align:center;
+    font-size:26px;
+    font-family:monospace;
+    background:#1f1d2e;
+    border-radius:17px;
+    padding:5px;
+    margin-top:7px;
+}
+.result{
+    background:#ffb347;
+    color:#18251d;
+    text-align:center;
+    padding:8px;
+    border-radius:17px;
+    font-weight:bold;
+    margin-top:7px;
+}
+.help{
+    display:none;
+    background:#eef5db;
+    color:#1f4a2c;
+    padding:9px;
+    border-radius:17px;
+    margin-top:8px;
+    text-align:center;
+    direction:ltr;
+    font-weight:bold;
+}
+@media(max-width:700px){
+    .ref-text{height:190px;font-size:13px}
+    textarea{height:145px;font-size:18px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>اختبار سرعة الكتابة</h1>
+
+<div class="top-control">
+    <button id="startBtn">▶ ابدأ</button>
+    <button id="pauseBtn">⏸ إيقاف</button>
+    <button id="resumeBtn">▶ استئناف</button>
+    <button id="resetBtn">🔄 إعادة</button>
+    <button id="learnBtn">📚 الحركات</button>
+
+    <div class="control-item">
+        ⏱️ المدة:
+        <input type="number" id="durationMinutes" min="0.5" step="0.5" value="3" style="width:58px">
+        دقيقة
+    </div>
+
+    <div class="control-item">
+        ✍️ خط الكتابة:
+        <select id="fontSizeSelect">
+            <option value="18">18px</option>
+            <option value="22" selected>22px</option>
+            <option value="26">26px</option>
+            <option value="30">30px</option>
+        </select>
+    </div>
+
+    <div class="control-item">
+        🎨 لون الكتابة:
+        <input type="color" id="fontColorPicker" value="#1f2a36">
+    </div>
+</div>
+
+<div class="ref-box">
+
+    <div class="top-row">
+        <div class="type-btn active" data-type="0">📖 نصوص إسلامية</div>
+        <div class="type-btn" data-type="1">🔢 أرقام</div>
+        <div class="type-btn" data-type="2">📜 كلمات مشكلة</div>
+    </div>
+
+    <div class="top-row" id="islamicButtons">
+        <button data-islam="0">⭐ النبي محمد ﷺ</button>
+        <button data-islam="1">⚔️ عمر بن الخطاب</button>
+        <button data-islam="2">🤍 أبو بكر الصديق</button>
+    </div>
+
+    <div class="ref-text" id="referenceTextDisplay"></div>
+</div>
+
+<textarea id="userInputArea" disabled placeholder="✏️ اضغط ابدأ الاختبار ثم اكتب هنا..."></textarea>
+
+<div class="info-panel">
+    <div class="stats">
+        <div class="stat">✅ صحيح: <span id="correctChars">0</span></div>
+        <div class="stat">❌ خطأ: <span id="wrongChars">0</span></div>
+        <div class="stat">🎯 الدقة: <span id="accuracyPercent">100</span>%</div>
+        <div class="stat">⚡ السرعة: <span id="currentSpeed">0</span> حرف/د</div>
+    </div>
+
+    <div class="timer" id="timerDisplay">03:00</div>
+    <div class="result" id="resultArea">✨ اختر الاختبار واضغط ابدأ ✨</div>
+    <div class="help" id="helpBox"></div>
+</div>
+
+</div>
+
+<script>
+const ISLAMIC_TEXTS = [
+{
+content:`محمد بن عبد الله ولد في عام الفيل بمكة المكرمة. نشأ يتيما فحضنه جده عبد المطلب ثم عمه أبو طالب. عرف بالصدق والأمانة منذ صغره فلقب بالأمين. بعثه الله رحمة للعالمين فدعا إلى التوحيد ومكارم الأخلاق. عانى من أذى قريش وصبر على الأذى في سبيل الدعوة. هاجر إلى المدينة المنورة وأسس دولة العدل والإخاء. كان خلقه القرآن يأمر بالمعروف وينهى عن المنكر. ترك لنا سنة عطرة وأحاديث نبوية تنير الدرب. توفي صلى الله عليه وسلم وقد أكمل الرسالة وترك أمته على المحجة البيضاء. علم الناس الرحمة والصدق وحسن التعامل مع القريب والبعيد. وكان مثالا في الصبر والحكمة والوفاء وحب الخير للناس جميعا.`
+},
+{
+content:`عمر بن الخطاب الفاروق ولد بعد عام الفيل بثلاث عشرة سنة. كان شديد البأس قوي الجانب في الجاهلية ثم أسلم فأعز الله به الإسلام. هاجر إلى المدينة جهرا وكان يوم هجرته مشهودا بالعزة. شهد الغزوات كلها مع الرسول وكان سيفا مسلولا على الكفار. فتح الأمصار الكبرى مثل الشام ومصر والعراق وفارس. اشتهر بالعدل حتى كان يطوف بالليل ليتفقد أحوال الرعية. استشهد وهو يصلي الفجر. عاش عمر قدوة في الزهد والحكمة والسياسة العادلة. كان لا يفرق في الحق بين قوي وضعيف ولا بين قريب وبعيد. وبقي اسمه رمزا للعدل والشجاعة وحسن قيادة الأمة.`
+},
+{
+content:`عبد الله بن أبي قحافة كان من أوائل الذين أسلموا في مكة دون تردد. لقب بالصديق لأنه صدق النبي في رحلة الإسراء والمعراج. أنفق ماله في سبيل الله وفي نصرة المستضعفين. هاجر مع الرسول وكان رفيقه في غار ثور. بعد وفاة النبي صار خليفة للمسلمين وثبت الأمة. جمع القرآن الكريم خشية ضياعه. كان رقيق القلب كثير البكاء من خشية الله وقت الصلاة. أبو بكر أول الخلفاء الراشدين ومثال للصدق والفداء. كان حكيما في قراراته ثابتا عند الشدائد لا يخشى في الله لومة لائم. وظل حبه للنبي وخدمته للإسلام من أعظم صور الوفاء والإيمان.`
+}
+];
+
+const NUMERIC_STR =
+"5832017445981230990114567129077345621039928813267001458900133247685241095678311029445006781190234567218839214009760123958427193684025592177309412006893050017342891025678432107650919384627483591480236471952308561407385967264115932840672935812349054612749058123734098691245098637211947582609509832618974390382069156767834129674938275302234198965141078369125874382190634751892350749623841780954092367819240528936741205639821780476901358996421802733941667538249145876131679";
+
+const TASHKEEL_WORDS =
+"مُحمد رسولٌ كتابًا سمكةً بيتُ عليّ فرحَ شجرةٌ قلمُ صالحٌ أكلَ تفاحةً سريعٌ جميلةً ضوءُ الفجرِ نامَ ولدٌ شكرًا ماءُ زهرةٍ بريدُ سعيدٌ صديقٌ علمُ كبيرةٌ نورُ صباحٍ مدرسةٌ جميلةٌ طريقٌ طويلٌ قلبٌ رحيمٌ طفلٌ نشيطٌ وردةٌ ناعمةٌ";
+
+let currentType = 0;
+let currentIslamicIndex = 0;
+let referenceText = ISLAMIC_TEXTS[0].content;
+
+let testActive = false;
+let isPaused = false;
+let timerInterval = null;
+let totalDurationSeconds = 180;
+let timeRemainingSeconds = 180;
+let startTime = 0;
+let elapsedBeforePause = 0;
+let lastValue = "";
+
+const refDiv = document.getElementById("referenceTextDisplay");
+const userInput = document.getElementById("userInputArea");
+const correctSpan = document.getElementById("correctChars");
+const wrongSpan = document.getElementById("wrongChars");
+const accuracySpan = document.getElementById("accuracyPercent");
+const speedSpan = document.getElementById("currentSpeed");
+const timerDiv = document.getElementById("timerDisplay");
+const resultArea = document.getElementById("resultArea");
+const durationInput = document.getElementById("durationMinutes");
+const fontSizeSelect = document.getElementById("fontSizeSelect");
+const fontColorPicker = document.getElementById("fontColorPicker");
+const helpBox = document.getElementById("helpBox");
+const islamicButtons = document.getElementById("islamicButtons");
+
+let audioCtx = null;
+
+function initAudio(){
+    if(!audioCtx){
+        try{
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }catch(e){}
+    }
+}
+
+function beep(freq,duration,type){
+    try{
+        initAudio();
+        if(!audioCtx) return;
+        if(audioCtx.state === "suspended") audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = 0.10;
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+    }catch(e){}
+}
+
+function playCorrect(){beep(1000,0.05,"sine")}
+function playWrong(){beep(430,0.11,"triangle")}
+
+function escapeHTML(text){
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function getReference(){
+    if(currentType === 0) return ISLAMIC_TEXTS[currentIslamicIndex].content;
+    if(currentType === 1) return NUMERIC_STR;
+    return TASHKEEL_WORDS;
+}
+
+function updateReferenceDisplay(){
+    const typed = userInput.value;
+    const original = referenceText;
+    let html = "";
+
+    for(let i=0;i<original.length;i++){
+        const ch = escapeHTML(original[i]);
+
+        if(i < typed.length){
+            if(typed[i] === original[i]){
+                html += `<span class="correct-char">${ch}</span>`;
+            }else{
+                html += `<span class="wrong-char">${ch}</span>`;
+            }
+        }else if(i === typed.length && testActive && !isPaused){
+            html += `<span class="current-char">${ch}</span>`;
+        }else{
+            html += ch;
+        }
+    }
+
+    refDiv.innerHTML = html;
+}
+
+function getElapsedSeconds(){
+    if(!testActive && startTime === 0) return 0;
+    if(isPaused) return elapsedBeforePause / 1000;
+    return (elapsedBeforePause + (Date.now() - startTime)) / 1000;
+}
+
+function calculateStats(){
+    const typed = userInput.value;
+    const original = referenceText;
+
+    let correct = 0;
+    let wrong = 0;
+
+    for(let i=0;i<typed.length;i++){
+        if(i < original.length && typed[i] === original[i]) correct++;
+        else wrong++;
+    }
+
+    const accuracy = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+    const elapsedMinutes = getElapsedSeconds() / 60;
+    const speed = elapsedMinutes > 0 ? Math.round(correct / elapsedMinutes) : 0;
+
+    correctSpan.textContent = correct;
+    wrongSpan.textContent = wrong;
+    accuracySpan.textContent = accuracy;
+    speedSpan.textContent = speed;
+
+    return {correct,wrong,accuracy,speed};
+}
+
+function onTyping(){
+    if(!testActive || isPaused) return;
+
+    const current = userInput.value;
+    const lastIndex = current.length - 1;
+
+    if(current.length > lastValue.length && lastIndex >= 0){
+        if(lastIndex < referenceText.length && current[lastIndex] === referenceText[lastIndex]){
+            playCorrect();
+        }else{
+            playWrong();
+        }
+    }
+
+    lastValue = current;
+
+    updateReferenceDisplay();
+    calculateStats();
+
+    if(current === referenceText){
+        endTest("🎉 ممتاز! أنهيت النص بالكامل");
+    }
+}
+
+function formatTime(seconds){
+    seconds = Math.max(0,Math.floor(seconds));
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+
+function startCountdown(){
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(function(){
+        if(!testActive || isPaused) return;
+
+        timeRemainingSeconds--;
+        timerDiv.textContent = formatTime(timeRemainingSeconds);
+
+        calculateStats();
+
+        if(timeRemainingSeconds <= 0){
+            endTest("⏰ انتهى الوقت");
+        }
+    },1000);
+}
+
+function startTest(){
+    if(testActive && !isPaused){
+        resultArea.textContent = "⚠️ الاختبار يعمل بالفعل.";
+        return;
+    }
+
+    if(testActive && isPaused){
+        resumeTest();
+        return;
+    }
+
+    let mins = parseFloat(durationInput.value);
+    if(isNaN(mins) || mins <= 0) mins = 3;
+
+    totalDurationSeconds = Math.round(mins * 60);
+    timeRemainingSeconds = totalDurationSeconds;
+
+    referenceText = getReference();
+
+    userInput.value = "";
+    userInput.disabled = false;
+    userInput.focus();
+
+    testActive = true;
+    isPaused = false;
+    startTime = Date.now();
+    elapsedBeforePause = 0;
+    lastValue = "";
+
+    refDiv.scrollTop = 0;
+
+    timerDiv.textContent = formatTime(timeRemainingSeconds);
+    resultArea.textContent = "✍️ الاختبار بدأ...";
+
+    correctSpan.textContent = "0";
+    wrongSpan.textContent = "0";
+    accuracySpan.textContent = "100";
+    speedSpan.textContent = "0";
+
+    updateReferenceDisplay();
+    startCountdown();
+}
+
+function pauseTest(){
+    if(!testActive){
+        resultArea.textContent = "⚠️ لا يوجد اختبار نشط.";
+        return;
+    }
+
+    if(isPaused){
+        resultArea.textContent = "⚠️ الاختبار متوقف بالفعل.";
+        return;
+    }
+
+    isPaused = true;
+    elapsedBeforePause += Date.now() - startTime;
+    clearInterval(timerInterval);
+    userInput.disabled = true;
+    resultArea.textContent = "⏸ تم الإيقاف مؤقتاً.";
+}
+
+function resumeTest(){
+    if(!testActive || !isPaused){
+        resultArea.textContent = "⚠️ لا يوجد اختبار للاستئناف.";
+        return;
+    }
+
+    isPaused = false;
+    startTime = Date.now();
+    userInput.disabled = false;
+    userInput.focus();
+    resultArea.textContent = "▶ تم الاستئناف.";
+    startCountdown();
+    updateReferenceDisplay();
+}
+
+function endTest(message){
+    if(!testActive) return;
+
+    testActive = false;
+    isPaused = false;
+    clearInterval(timerInterval);
+
+    elapsedBeforePause += Date.now() - startTime;
+    userInput.disabled = true;
+
+    const stats = calculateStats();
+    updateReferenceDisplay();
+
+    resultArea.innerHTML =
+    `${message} 🏆 السرعة: ${stats.speed} حرف/دقيقة | الدقة: ${stats.accuracy}% | صحيح: ${stats.correct} | خطأ: ${stats.wrong}`;
+}
+
+function resetTest(){
+    clearInterval(timerInterval);
+
+    testActive = false;
+    isPaused = false;
+    startTime = 0;
+    elapsedBeforePause = 0;
+    lastValue = "";
+
+    let mins = parseFloat(durationInput.value);
+    if(isNaN(mins) || mins <= 0) mins = 3;
+
+    totalDurationSeconds = Math.round(mins * 60);
+    timeRemainingSeconds = totalDurationSeconds;
+
+    referenceText = getReference();
+
+    userInput.value = "";
+    userInput.disabled = true;
+
+    refDiv.scrollTop = 0;
+
+    timerDiv.textContent = formatTime(timeRemainingSeconds);
+    correctSpan.textContent = "0";
+    wrongSpan.textContent = "0";
+    accuracySpan.textContent = "100";
+    speedSpan.textContent = "0";
+    resultArea.textContent = "✅ تمت إعادة الضبط.";
+
+    updateReferenceDisplay();
+}
+
+function switchType(type){
+    if(testActive){
+        resultArea.textContent = "⚠️ أعد الضبط قبل تغيير نوع الاختبار.";
+        return;
+    }
+
+    currentType = type;
+    islamicButtons.style.display = currentType === 0 ? "flex" : "none";
+
+    document.querySelectorAll(".type-btn").forEach(btn=>{
+        btn.classList.toggle("active",Number(btn.dataset.type) === type);
+    });
+
+    resetTest();
+}
+
+function setIslamicText(index){
+    if(testActive){
+        resultArea.textContent = "⚠️ أعد الضبط قبل تغيير النص.";
+        return;
+    }
+
+    currentIslamicIndex = index;
+    resetTest();
+}
+
+function toggleHelp(){
+    if(helpBox.style.display === "block"){
+        helpBox.style.display = "none";
+    }else{
+        helpBox.innerHTML =
+        `الضمة: Shift + E |
+        الفتحة: Shift + A |
+        الكسرة: Shift + Q |
+        الشدة: Shift + W |
+        السكون: Shift + C |
+        تنوين الفتح: Shift + S |
+        تنوين الضم: Shift + R |
+        تنوين الكسر: Shift + X`;
+        helpBox.style.display = "block";
+    }
+}
+
+document.getElementById("startBtn").addEventListener("click",startTest);
+document.getElementById("pauseBtn").addEventListener("click",pauseTest);
+document.getElementById("resumeBtn").addEventListener("click",resumeTest);
+document.getElementById("resetBtn").addEventListener("click",resetTest);
+document.getElementById("learnBtn").addEventListener("click",toggleHelp);
+
+document.querySelectorAll(".type-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>switchType(Number(btn.dataset.type)));
+});
+
+document.querySelectorAll("[data-islam]").forEach(btn=>{
+    btn.addEventListener("click",()=>setIslamicText(Number(btn.dataset.islam)));
+});
+
+userInput.addEventListener("input",onTyping);
+
+fontSizeSelect.addEventListener("change",()=>{
+    userInput.style.fontSize = fontSizeSelect.value + "px";
+});
+
+fontColorPicker.addEventListener("change",()=>{
+    userInput.style.color = fontColorPicker.value;
+});
+
+document.body.addEventListener("click",()=>{
+    if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+});
+
+resetTest();
+</script>
+
+</body>
+</html>
